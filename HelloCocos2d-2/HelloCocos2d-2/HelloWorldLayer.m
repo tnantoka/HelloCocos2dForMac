@@ -62,6 +62,12 @@
         cocosGuy = [CCSprite spriteWithFile:@"Icon.png"];
         cocosGuy.position = ccp(200, 300);
         [self addChild:cocosGuy];
+        
+        // schedule a repeating callback on every frame
+        [self schedule:@selector(nextFrame:)];
+        
+        // register to receive targeted events
+        [self registerWithEventDispatcher];
 	}
 	return self;
 }
@@ -76,4 +82,25 @@
 	// don't forget to call "super dealloc"
 	[super dealloc];
 }
+
+-(void)registerWithEventDispatcher {
+    [[CCDirector sharedDirector].eventDispatcher addMouseDelegate:self priority:0];
+}
+
+- (void)nextFrame:(ccTime)dt {
+    seeker1.position = ccp(seeker1.position.x + 100 * dt, seeker1.position.y);
+    if (seeker1.position.x > [[CCDirector sharedDirector] winSize].width + 32) {
+        seeker1.position = ccp(-32, seeker1.position.y);
+    }
+}
+
+# pragma mark - CCMouseEventDelegate
+
+-(BOOL)ccMouseDown:(NSEvent *)event {
+    CGPoint convertedLocation = [[CCDirector sharedDirector] convertEventToGL:event];
+	[cocosGuy stopAllActions];
+	[cocosGuy runAction: [CCMoveTo actionWithDuration:1 position:convertedLocation]];
+    return YES;
+}
+
 @end
